@@ -69,22 +69,37 @@ class network():
 
         self.x = tf.placeholder(tf.float32, shape=dat_shape, name="x")
         self.y_= tf.placeholder(tf.float32, shape=lab_shape, name="y_")
-        x = tf.layers.conv2d(self.x, filters=10 ,kernel_size=[4, 4], strides=(2, 2))
-        x = tf.layers.conv2d(x, filters=10, kernel_size=[8, 8], strides=(4,4))
-        x = tf.layers.average_pooling2d(x, [10,10], [5, 5])
-        flatten_shape = int(np.prod(x.shape[1:]))
+        x4 = tf.layers.conv2d(self.x, filters=10 ,kernel_size=[4, 4], strides=(1, 1), padding='SAME')
+        x8 = tf.layers.conv2d(self.x, filters=10, kernel_size=[8, 8], strides=(1,1), padding='SAME')
+        xavg = tf.layers.average_pooling2d(self.x, [16,16], [1, 1], padding='SAME')
+        xmax = tf.layers.max_pooling2d(self.x, [12,12], [1, 1], padding='SAME')
+        inception_concat = tf.concat(axis=3, values=[x4, x8, xavg, xmax])
+        
+        
+        flatten_shape = int(np.prod(inception_concat.shape[1:]))
         print(flatten_shape)
-        rs = tf.reshape(x,  shape = [-1, flatten_shape])
+        rs = tf.reshape(inception_concat,  shape = [-1, flatten_shape])
 
         dense_layer = tf.layers.dense(rs, units=self.label_len)
         
         y = tf.nn.softmax(dense_layer, name='softmax')
         cross_entropy = -tf.reduce_sum(self.y_*tf.log(y))
-        self.train_step = tf.train.AdamOptimizer(1e-4).minimize(cross_entropy)
+
+        starter_learning_rate = 1e-5
+        learning_rate = tf.train.exponential_decay(starter_learning_rate, 1, 1000, 0.9, staircase=True)
+        self.train_step = tf.train.AdamOptimizer(learning_rate).minimize(cross_entropy)
         self.correct_prediction = tf.equal(tf.argmax(y, 1), tf.argmax(self.y_, 1))
+        
+        
         self.accuracy = tf.reduce_mean(tf.cast(self.correct_prediction, "float"))
         self.init = tf.initialize_all_variables()
 
+
+        variables = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES)
+        for variable in variables:
+            var_norm = tf.norm(variable)
+            tf.summary.scalar("/grad_norm/" + variable.name, var_norm)
+                                           
         loss_saliency = compute_saliency_maps(self.x, cross_entropy)
         loss_summary = tf.summary.scalar("loss", cross_entropy)
         accuracy_summary = tf.summary.scalar("accuracy", self.accuracy)

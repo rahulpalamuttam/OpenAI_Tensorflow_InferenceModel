@@ -44,10 +44,10 @@ env.render()
 done = [False]
 d = 0
 
-checkpoint_path = 'temp/conv2d8x4_average_pooling_simple_affine_lr1e-4-1496924405/checkpoint-228'
+checkpoint_path = 'temp/inception/checkpoint-52'
 sess = tf.Session()
-saver = tf.train.import_meta_graph('temp/conv2d8x4_average_pooling_simple_affine_lr1e-4-1496924405/checkpoint-228.meta')
-saver.restore(sess, tf.train.latest_checkpoint('temp/conv2d8x4_average_pooling_simple_affine_lr1e-4-1496924405/'))
+saver = tf.train.import_meta_graph('temp/inception/checkpoint-52.meta')
+saver.restore(sess, tf.train.latest_checkpoint('temp/inception/'))
 graph = tf.get_default_graph()
 
 print_tensors_in_checkpoint_file(file_name=checkpoint_path, tensor_name='', all_tensors=True)
