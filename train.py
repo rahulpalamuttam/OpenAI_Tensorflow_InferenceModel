@@ -1,6 +1,6 @@
 import pickle
 import numpy as np
-from numpy import vstack
+#from numpy import vstack
 from numpy import zeros
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
@@ -79,10 +79,16 @@ class network():
         
         y = tf.nn.softmax(dense_layer, name='softmax')
         cross_entropy = -tf.reduce_sum(self.y_*tf.log(y))
-        self.train_step = tf.train.AdamOptimizer(1e-4).minimize(cross_entropy)
+        starter_learning_rate = 1e-5
+        learning_rate = tf.train.exponential_decay(starter_learning_rate, 1, 1000, 0.9, staircase=True)
+        self.train_step = tf.train.AdamOptimizer(learning_rate).minimize(cross_entropy)
         self.correct_prediction = tf.equal(tf.argmax(y, 1), tf.argmax(self.y_, 1))
         self.accuracy = tf.reduce_mean(tf.cast(self.correct_prediction, "float"))
-        self.init = tf.initialize_all_variables()
+        self.init = tf.global_variables_initializer()
+        variables = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES)
+        for variable in variables:
+            var_norm = tf.norm(variable)
+            tf.summary.scalar("/grad_norm/" + variable.name, var_norm)
 
         loss_saliency = compute_saliency_maps(self.x, cross_entropy)
         loss_summary = tf.summary.scalar("loss", cross_entropy)
