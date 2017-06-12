@@ -28,7 +28,7 @@ output = open('test_data.pkl', 'wb')
 env.render()
 done = [False]
 d = 0
-while d < 1 or done[0] == False:
+while d < 2 or done[0] == False:
     print(observation_n[0])
     print("ob len " + str(len(observation_n)))
     print(type(observation_n[0]))

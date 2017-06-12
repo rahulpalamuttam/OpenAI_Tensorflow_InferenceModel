@@ -70,6 +70,7 @@ class network():
         self.x = tf.placeholder(tf.float32, shape=dat_shape, name="x")
         self.y_= tf.placeholder(tf.float32, shape=lab_shape, name="y_")
         x = tf.layers.conv2d(self.x, filters=10 ,kernel_size=[4, 4], strides=(2, 2))
+        x = tf.layers.conv2d(x, filters=10, kernel_size=[8, 8], strides=(4,4))
         x = tf.layers.average_pooling2d(x, [10,10], [5, 5])
         flatten_shape = int(np.prod(x.shape[1:]))
         print(flatten_shape)
@@ -79,7 +80,7 @@ class network():
         
         y = tf.nn.softmax(dense_layer, name='softmax')
         cross_entropy = -tf.reduce_sum(self.y_*tf.log(y))
-        self.train_step = tf.train.AdamOptimizer(1e-5).minimize(cross_entropy)
+        self.train_step = tf.train.AdamOptimizer(1e-4).minimize(cross_entropy)
         self.correct_prediction = tf.equal(tf.argmax(y, 1), tf.argmax(self.y_, 1))
         self.accuracy = tf.reduce_mean(tf.cast(self.correct_prediction, "float"))
         self.init = tf.initialize_all_variables()
@@ -101,8 +102,8 @@ class network():
 
         for epoch in range(1000):
             for i in range(100):
-                val_indices = random.sample(range(0, len(self.test_labels)), 60)
-                batch_xs, batch_ys = self.data[i*60:(i+1)*60], self.labels[i*60:(i+1)*60]
+                val_indices = random.sample(range(0, len(self.test_labels)), 50)
+                batch_xs, batch_ys = self.data[i*50:(i+1)*50], self.labels[i*50:(i+1)*50]
                 
                 batch_xs_test, batch_ys_test = self.test_data[val_indices], self.test_labels[val_indices]
                 _, sumr = sess.run([self.train_step, self.summary_op], feed_dict={self.x:batch_xs, self.y_: batch_ys})
@@ -117,7 +118,7 @@ class network():
 
 
 print(sys.argv[1])
-data1 = pickle.load(open('sanity_dataset.pkl', 'rb'))
+data1 = pickle.load(open('train_dataset.pkl', 'rb'))
 separated = [list(t) for t in zip(*data1)]
 images, labels = separated[0], separated[1]
 

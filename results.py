@@ -71,10 +71,10 @@ tur = np.asarray(images)
 
 img = np.concatenate([separated[0][t] for t in range(0, 100)], axis=1)
 print(img.shape)
-im = plt.imshow(img)
+#im = plt.imshow(img)
 
-plt.show()
-sys.exit()
+#plt.show()
+#sys.exit()
 embedding = np.asarray([np.asarray(t) for t in separated[1]])
 
 embedding_image_dict = collections.defaultdict(list)
@@ -97,7 +97,7 @@ for k, v in embedding_image_dict.items():
         final_set.extend(duplicates)
     if(k == "[0, 1, 0, 0, 0]"):
         up = np.asarray([0, 1, 0, 0, 0])
-        duplicates = [(val, up) for val in v for i in range(0,9)]
+        duplicates = [(val, up) for val in v for i in range(0,5)]
         print(str(len(duplicates)))
         final_set.extend(duplicates)
     if(k == "[0, 0, 1, 0, 0]"):
@@ -106,6 +106,12 @@ for k, v in embedding_image_dict.items():
         duplicates = [(val, up) for val in v for i in range(0,900)]
         print(str(len(duplicates)))
         final_set.extend(duplicates)
+    # if(k == "[1, 0, 0, 0, 0]"):
+    #     # whoops never pressed down
+    #     up = np.asarray([1, 0, 0, 0, 0])
+    #     duplicates = [(val, up) for val in v for i in range(0,900)]
+    #     print(str(len(duplicates)))
+    #     final_set.extend(duplicates)
 
 shuffle(final_set)
 
