@@ -69,12 +69,20 @@ class network():
 
         self.x = tf.placeholder(tf.float32, shape=dat_shape, name="x")
         self.y_= tf.placeholder(tf.float32, shape=lab_shape, name="y_")
-        x4 = tf.layers.conv2d(self.x, filters=10 ,kernel_size=[4, 4], strides=(1, 1), padding='SAME')
-        x8 = tf.layers.conv2d(self.x, filters=10, kernel_size=[8, 8], strides=(1,1), padding='SAME')
+
+        
+        x4 = tf.nn.relu(tf.layers.conv2d(self.x, filters=10 ,kernel_size=[4, 4], strides=(1, 1), padding='SAME'))
+        x8 = tf.nn.relu(tf.layers.conv2d(self.x, filters=10, kernel_size=[8, 8], strides=(1,1), padding='SAME'))
         xavg = tf.layers.average_pooling2d(self.x, [16,16], [1, 1], padding='SAME')
         xmax = tf.layers.max_pooling2d(self.x, [12,12], [1, 1], padding='SAME')
-        inception_concat = tf.concat(axis=3, values=[x4, x8, xavg, xmax])
-        
+        inception_concat = tf.nn.relu(tf.concat(axis=3, values=[x4, x8, xavg, xmax]))
+        for i in range(0, 1):
+                    x4 = tf.nn.relu(tf.layers.conv2d(inception_concat, filters=10 ,kernel_size=[4, 4], strides=(1, 1), padding='SAME'))
+                    x8 = tf.nn.relu(tf.layers.conv2d(inception_concat, filters=10, kernel_size=[8, 8], strides=(1,1), padding='SAME'))
+                    xavg = tf.layers.average_pooling2d(inception_concat, [16,16], [1, 1], padding='SAME')
+                    xmax = tf.layers.max_pooling2d(inception_concat, [12,12], [1, 1], padding='SAME')
+                    inception_concat = tf.nn.relu(tf.concat(axis=3, values=[x4, x8, xavg, xmax]))
+
         
         flatten_shape = int(np.prod(inception_concat.shape[1:]))
         print(flatten_shape)
@@ -85,7 +93,7 @@ class network():
         y = tf.nn.softmax(dense_layer, name='softmax')
         cross_entropy = -tf.reduce_sum(self.y_*tf.log(y))
 
-        starter_learning_rate = 1e-5
+        starter_learning_rate = 1e-6
         learning_rate = tf.train.exponential_decay(starter_learning_rate, 1, 1000, 0.9, staircase=True)
         self.train_step = tf.train.AdamOptimizer(learning_rate).minimize(cross_entropy)
         self.correct_prediction = tf.equal(tf.argmax(y, 1), tf.argmax(self.y_, 1))
