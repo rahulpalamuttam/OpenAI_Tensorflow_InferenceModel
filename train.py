@@ -69,8 +69,7 @@ class network():
 
         self.x = tf.placeholder(tf.float32, shape=dat_shape, name="x")
         self.y_= tf.placeholder(tf.float32, shape=lab_shape, name="y_")
-        x = tf.layers.conv2d(self.x, filters=10 ,kernel_size=[4, 4], strides=(2, 2))
-        x = tf.layers.conv2d(x, filters=10, kernel_size=[8, 8], strides=(4,4))
+        x = tf.layers.conv2d(self.x, filters=10 ,kernel_size=[8, 8], strides=(4, 4))
         x = tf.layers.average_pooling2d(x, [10,10], [5, 5])
         flatten_shape = int(np.prod(x.shape[1:]))
         print(flatten_shape)
