@@ -107,8 +107,8 @@ class network():
 
         for epoch in range(1000):
             for i in range(100):
-                val_indices = random.sample(range(0, len(self.test_labels)), 50)
-                batch_xs, batch_ys = self.data[i*50:(i+1)*50], self.labels[i*50:(i+1)*50]
+                val_indices = random.sample(range(0, len(self.test_labels)), 130)
+                batch_xs, batch_ys = self.data[i*130:(i+1)*130], self.labels[i*130:(i+1)*130]
                 
                 batch_xs_test, batch_ys_test = self.test_data[val_indices], self.test_labels[val_indices]
                 _, sumr = sess.run([self.train_step, self.summary_op], feed_dict={self.x:batch_xs, self.y_: batch_ys})
@@ -124,11 +124,16 @@ class network():
 
 print(sys.argv[1])
 data1 = pickle.load(open('train_dataset.pkl', 'rb'))
-separated = [list(t) for t in zip(*data1)]
+data2 = pickle.load(open('train_dataset2.pkl', 'rb'))
+
+separated = [list(t) for t in zip(*(data1+data2))]
+print("The total size = " + str(len(separated[0])))
 images, labels = separated[0], separated[1]
 
 test1 = pickle.load(open('test_dataset.pkl', 'rb'))
-testseparated = [list(t) for t in zip(*test1)]
+test2 = pickle.load(open('test_dataset2.pkl', 'rb'))
+testseparated = [list(t) for t in zip(*(test1 + test2))]
+print("The total test size = " + str(len(testseparated[0])))
 testimages, testlabels = testseparated[0], testseparated[1]
 
 n = network(np.asarray(images), np.asarray(labels), np.asarray(testimages), np.asarray(testlabels))
